@@ -57,3 +57,5 @@ func main2() {
 	}
 	fmt.Println(valor)
 }
+
+// em go, geralmente o ultimo item de retorno será um error para verificar se deu tudo certo e tratar
