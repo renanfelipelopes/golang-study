@@ -2,13 +2,21 @@ package main
 
 import "fmt"
 
-// Metodos em Structs aula F021
+// Interface aula F022
 
 type Endereco struct {
 	Logradouro string
 	Numero     int
 	Cidade     string
 	Estado     string
+}
+
+// Uma interface em Go é similiar a uma interface em POO
+// No exemplo seguinte, implementamos uma interface, e significa
+// que qualquer Struct que tiver o metodo Desativar, estará implementando
+// uma interface. Uma interface não precisa ser implementada igual ao Java
+type Pessoa interface {
+	Desativar()
 }
 
 type Cliente struct {
