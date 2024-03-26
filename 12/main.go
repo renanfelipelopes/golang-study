@@ -2,9 +2,14 @@ package main
 
 import "fmt"
 
-// Structs aula F019
-// Go não é uma linguagem orientada a objetos, a forma mais clara de escrever em Go é
-// usando Structs. Uma Struct não é uma classe. Não conseguimos trabalhar com herança, mas conseguimos com Composicao
+// Composicao de Structs aula F020
+
+type Endereco struct {
+	Logradouro string
+	Numero     int
+	Cidade     string
+	Estado     string
+}
 
 type Cliente struct {
 	Nome  string
