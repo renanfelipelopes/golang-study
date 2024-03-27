@@ -15,4 +15,8 @@ func main() {
 
 	*b = 30
 	println(a) // o resultado será: 30.
+
+	c := ponteiro
+	*c = 40
+	println(a) // o resultado de a será: 40
 }
