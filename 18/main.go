@@ -21,3 +21,6 @@ func main() {
 // no metodo Simular, agora recebe como parametro a Struct Conta com um asteristico, o que
 // significa que eu estou passando o ponteiro e manipulando o valor original contido dentro
 // da memoria, e não uma copia.
+
+// É comum em Go criar Structs com apontamentos para a memoria porque geralmente existe a
+// intenção de alterar o valor original.
