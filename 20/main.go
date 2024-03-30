@@ -33,4 +33,7 @@ um false como resultado.
 Se caso eu tentasse criar a conversao sem a variavel ok por exemplo, o Go daria um erro de
 Panic, isso pq ele percebe que vc não esta querendo verificar se deu certo, e ele tenta manter
 a tipagem forte.
+
+Isso é mais comum em codigos legados, quando o Go não possuia tipos Genericos, e se usava muito
+interfaces vazias.
 */
