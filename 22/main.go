@@ -27,12 +27,11 @@ O nosso import ficará assim:
 import (
 	"fmt"
 
-	"github.com/renanfelipelopes/golang-study/matematica"
+	"github.com/renanfelipelopes/golang-study/22/matematica"
 )
 
 func main() {
 	s := matematica.Soma(10, 20)
 
-	fmt.Println("Resultado: %v", s)
-
+	fmt.Println("Resultado: ", s)
 }
