@@ -41,7 +41,7 @@ type Cliente struct {
 func main() {
 	renan := Cliente{
 		Nome:  "Renan",
-		Idade: 28,
+		Idade: 19,
 		Ativo: true,
 	}
 
@@ -105,8 +105,8 @@ func main() {
 		cliente := Cliente{
 			Nome: "Renan",
 			Endereco: Endereco{
-				Cidade: "Santo André",
-				Estado: "SP",
+				Cidade: "Bahia",
+				Estado: "BA",
 			},
 		}
 
