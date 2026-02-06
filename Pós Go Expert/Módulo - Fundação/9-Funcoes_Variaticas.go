@@ -1,4 +1,7 @@
 /*
+	Aula: Funções variáticas
+
+
 	Para entender melhor o que é funções variáticas, podemos usar o seguinte exemplo:
 	Se eu precisar somar uma infinidade de números mas eu não sei a quantidade de números
 	que eu vou somar. O que fazer nesse caso?
