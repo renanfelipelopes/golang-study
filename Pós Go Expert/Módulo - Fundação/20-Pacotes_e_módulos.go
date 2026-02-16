@@ -26,10 +26,11 @@ O nosso import ficará assim:
 */
 
 import (
+	"curso-go/matematica"
 	"fmt"
 )
 
 func main() {
 	s := matematica.Soma(10, 20)
-	fmt.Println("Resultado: ", s)
+	fmt.Println("Resultado:", s)
 }
