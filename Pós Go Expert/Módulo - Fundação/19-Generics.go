@@ -108,3 +108,135 @@ func main() {
 	println(SomaGenerics(m))
 	println(SomaGenerics(m2))
 }
+
+// ========================================================================================================== //
+
+/*
+
+🧠 Problema antes dos Generics
+
+func SomaInt(m map[string]int) int
+func SomaFloat(m map[string]float64) float64
+
+👉 Mesmo algoritmo
+👉 Só muda tipo
+
+Isso gera:
+- Código duplicado
+- Difícil manutenção
+- Mais chance de bug
+
+-----------------------------------------------------------------
+
+🔥 Solução: Generics
+
+func SomaGenerics[T int | float64](m map[string]T) T
+
+🔍 O que significa [T int | float64]
+👉 T é um Type Parameter
+👉 Pode ser:
+int
+float64
+
+🧠 Como o compilador trata isso
+Ele gera versões especializadas:
+SomaGenerics[int]
+SomaGenerics[float64]
+
+👉 Sem reflection
+👉 Sem interface boxing
+👉 Performance próxima de código manual
+
+-----------------------------------------------------------------
+
+🔥 Melhor prática: Constraints com Interface
+
+Exemplo:
+
+type Number interface {
+	int | float64
+}
+
+Uso:
+func SomaGenerics[T Number](m map[string]T) T
+
+-----------------------------------------------------------------
+
+🚀 Parte AVANÇADA — o ~ (Underlying Type Constraint)
+Essa parte é MUITO importante.
+
+❌ Sem ~
+type Number interface {
+	int | float64
+}
+
+Isso aceita:
+✔ int
+✔ float64
+
+Mas NÃO aceita:
+type MyNumber int
+
+Porque:
+👉 MyNumber ≠ int
+👉 Só tem int como underlying type
+
+✅ Com ~
+type Number interface {
+	~int | ~float64
+}
+
+Agora aceita:
+✔ int
+✔ float64
+✔ type MeuInt int
+✔ type MeuFloat float64
+
+🧠 O que ~ significa?
+👉 "Qualquer tipo cujo tipo base seja esse"
+
+🧠 Visual mental
+
+Sem ~
+
+Aceita:
+ int
+ float64
+
+
+Com ~
+
+Aceita:
+ int
+ MyInt
+ CustomInt
+ float64
+ MyFloat
+
+ -----------------------------------------------------------------
+
+⚠️ Quando NÃO usar Generics
+
+Quando quer comportamento → Interface normal
+
+Exemplo:
+
+type Reader interface {
+	Read([]byte) (int, error)
+}
+
+🧠 Regra mental definitiva Go moderno
+
+👉 Generics → para dados
+👉 Interface → para comportamento
+
+-----------------------------------------------------------------
+
+🧠 Resumo final
+
+- Generics evitam duplicação
+- Constraints definem limites do tipo
+- ~ permite tipos derivados
+- Melhor que interface{} na maioria dos casos
+- Padrão moderno Go
+*/
