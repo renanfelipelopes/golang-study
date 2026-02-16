@@ -40,3 +40,37 @@ a tipagem forte.
 Isso é mais comum em codigos legados, quando o Go não possuia tipos Genericos, e se usava muito
 interfaces vazias.
 */
+
+/*
+🛠 Onde isso aparece na vida real
+JSON dinâmico
+map[string]interface{}
+
+Kafka / eventos
+libs antigas
+reflection
+frameworks antigos Go < 1.18
+
+⚠️ Hoje: Generics reduziram MUITO isso
+
+Antes:
+func Process(v interface{}) {}
+
+Hoje:
+func Process[T any](v T) {}
+- Muito mais seguro.
+
+🧠 Regra mental de mercado (2026)
+Use:
+✔ Generics → padrão novo
+✔ Interfaces → comportamento
+✔ interface{} → casos muito dinâmicos
+
+🧠 Resumo final
+- Type assertion recupera tipo real da interface
+- .(Tipo) → pode dar panic
+- .(Tipo) + ok → seguro
+- println não é confiável para interfaces
+- Use fmt
+- Hoje generics reduziram uso disso
+*/
