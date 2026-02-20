@@ -12,7 +12,10 @@
 
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"os"
+)
 
 type Conta struct {
 	Numero int
@@ -27,4 +30,8 @@ func main() {
 	}
 	println(string(res))
 
+	err = json.NewEncoder(os.Stdout).Encode(conta)
+	if err != nil {
+		println(err)
+	}
 }
