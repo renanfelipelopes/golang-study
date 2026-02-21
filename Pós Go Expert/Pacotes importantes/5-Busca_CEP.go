@@ -40,6 +40,11 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Erro ao fazer parse da resposta: %v\n", err)
 		}
-		fmt.Println(data)
+		file, err := os.Create("cidade.txt")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Erro ao criar arquivo: %v\n", err)
+		}
+		defer file.Close()
+		_, err = file.WriteString(fmt.Sprintf("CEP: %s, Localidade: %s, UF: %s", data.Cep, data.Localidade, data.Uf))
 	}
 }
