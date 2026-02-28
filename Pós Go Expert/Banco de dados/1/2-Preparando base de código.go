@@ -63,7 +63,7 @@ func updateProduct(db *sql.DB, product *Product) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer stmt.Close()
 	_, err = stmt.Exec(product.Name, product.Price, product.ID)
 	if err != nil {
 		return err
@@ -78,6 +78,7 @@ func selectProduct(db *sql.DB, id string) (*Product, error) {
 	}
 	defer stmt.Close()
 	var p Product
+	// err = stmt.QueryRowContext(ctx, id).Scan(&p.ID, &p.Name, &p.Price) poderia usar context aqui, por exemplo, caso a consulta fosse pesada, colocariamos um timer para encerrar a execução depois de determinado tempo
 	err = stmt.QueryRow(id).Scan(&p.ID, &p.Name, &p.Price)
 	if err != nil {
 		return nil, err
