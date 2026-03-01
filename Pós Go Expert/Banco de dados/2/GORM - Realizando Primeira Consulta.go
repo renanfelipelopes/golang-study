@@ -11,15 +11,21 @@ type Product struct {
 	ID    int `gorm:"primaryKey"`
 	Name  string
 	Price float64
+	gorm.Model
 }
 
 func main() {
-	dsn := "root:root@tcp(localhost:3306)/goexpert"
+	dsn := "root:root@tcp(localhost:3306)/goexpert?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 	db.AutoMigrate(&Product{})
+
+	// db.Create(&Product{
+	// 	Name:  "Notebook",
+	// 	Price: 1000.00,
+	// })
 
 	// select one
 	// var product Product
@@ -38,20 +44,20 @@ func main() {
 	// }
 
 	// select all com limit de resposta
-	var products []Product
-	db.Limit(2).Find(&products)
-	for _, product := range products {
-		fmt.Println(product)
-	}
+	// var products []Product
+	// db.Limit(2).Find(&products)
+	// for _, product := range products {
+	// 	fmt.Println(product)
+	// }
 
 	// select all com limit e OffSet (offset é a paginação, se tiver 4 registros no banco de dados,
 	// a consulta irá dividir o retorno em 2 paginas e trazer os valores da pagina que colocarmos
 	// no parametro Offset())
-	var products2 []Product
-	db.Limit(2).Offset(2).Find(&products2)
-	for _, product := range products {
-		fmt.Println(product)
-	}
+	// var products2 []Product
+	// db.Limit(2).Offset(2).Find(&products2)
+	// for _, product := range products2 {
+	// 	fmt.Println(product)
+	// }
 
 	// where
 	// var products []Product
