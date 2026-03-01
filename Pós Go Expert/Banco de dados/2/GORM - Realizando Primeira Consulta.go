@@ -31,8 +31,37 @@ func main() {
 	// fmt.Println(product)
 
 	// select all
+	// var products []Product
+	// db.Find(&products)
+	// for _, product := range products {
+	// 	fmt.Println(product)
+	// }
+
+	// select all com limit de resposta
 	var products []Product
-	db.Find(&products)
+	db.Limit(2).Find(&products)
+	for _, product := range products {
+		fmt.Println(product)
+	}
+
+	// select all com limit e OffSet (offset é a paginação, se tiver 4 registros no banco de dados,
+	// a consulta irá dividir o retorno em 2 paginas e trazer os valores da pagina que colocarmos
+	// no parametro Offset())
+	var products2 []Product
+	db.Limit(2).Offset(2).Find(&products2)
+	for _, product := range products {
+		fmt.Println(product)
+	}
+
+	// where
+	// var products []Product
+	// db.Where("price > ?", 90).Find(&products)
+	// for _, product := range products {
+	// 	fmt.Println(product)
+	// }
+
+	var products []Product
+	db.Where("name LIKE ?", "%book%").Find(&products)
 	for _, product := range products {
 		fmt.Println(product)
 	}
