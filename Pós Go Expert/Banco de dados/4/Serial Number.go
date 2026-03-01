@@ -53,11 +53,11 @@ func main() {
 		ProductID: 1,
 	})
 
-	var products []Product
-	db.Find("name LIKE ?", "%Notebook%")
-	for _, product := range products {
-		db.Delete(product)
-	}
+	// var products []Product
+	// db.Find("name LIKE ?", "%Notebook%")
+	// for _, product := range products {
+	// 	db.Delete(product)
+	// }
 
 	var products2 []Product
 	db.Preload("Category").Preload("SerialNumber").Find(&products2)
