@@ -1,0 +1,296 @@
+// =========================
+// arquivo: tax.go
+// =========================
+
+package tax
+
+// CalculateTax calcula o valor de imposto baseado no valor recebido.
+// REGRA DE NEGÓCIO:
+// - Se o valor for >= 1000, retorna 10
+// - Caso contrário, retorna 5
+//
+// ⚠️ OBS IMPORTANTE (design):
+// Aqui estamos retornando um valor FIXO (10 ou 5), e não uma porcentagem.
+// Em cenários reais, normalmente o imposto seria proporcional ao valor (ex: 10%).
+// Esse tipo de implementação é comum em exemplos didáticos, mas em produção,
+// isso provavelmente estaria incorreto ou incompleto.
+//
+// 🔍 Ponto de atenção:
+// - float64 foi escolhido, provavelmente por simplicidade.
+// - Para valores financeiros reais, isso NÃO é recomendado.
+//   O ideal seria usar:
+//     - inteiros (centavos) ou
+//     - bibliotecas de precisão decimal (ex: shopspring/decimal)
+//
+// 💡 Internamente:
+// - Não há alocação de memória no heap aqui.
+// - Tudo é resolvido na stack (função simples, sem escape).
+// - Função extremamente barata em termos de performance.
+//
+// 🧠 Complexidade:
+// - O(1) — tempo constante
+func CalculateTax(amount float64) float64 {
+	// Branch simples
+	// Em nível de CPU, isso vira um branch condicional (if)
+	if amount >= 1000 {
+		return 10.0
+	}
+	return 5.0
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// =========================
+// arquivo: tax_test.go
+// =========================
+
+package tax
+
+import (
+	"testing"
+)
+
+// TestCalculateTax testa um único cenário específico.
+// 🔍 Esse tipo de teste é chamado de "test case isolado".
+//
+// 🧠 Problema desse approach:
+// - Baixa escalabilidade
+// - Muito código repetido se tivermos vários cenários
+// - Difícil manutenção conforme regras aumentam
+//
+// 💡 Boa prática:
+// - Usar esse formato apenas para casos muito específicos ou edge cases críticos
+func TestCalculateTax(t *testing.T) {
+	// Arrange (preparação dos dados)
+	amount := 500.0
+	expected := 5.0
+
+	// Act (execução)
+	result := CalculateTax(amount)
+
+	// Assert (validação)
+	if result != expected {
+		// ⚠️ Pequeno bug de mensagem:
+		// "bit got" deveria ser "but got"
+		t.Errorf("Expected %f bit got %f", expected, result)
+	}
+}
+
+// TestCalculateTaxBatch utiliza o padrão de "table-driven tests",
+// que é um dos padrões MAIS IMPORTANTES e IDIOMÁTICOS em Go.
+//
+// 💡 Esse padrão é extremamente comum em código de produção,
+// principalmente em projetos grandes e bibliotecas open-source.
+//
+// 🧠 Benefícios:
+// - Escalável
+// - Fácil manutenção
+// - Redução de duplicação
+// - Melhor cobertura de cenários
+//
+// 📌 Estrutura:
+// 1. Define um tipo (struct) com os inputs e outputs esperados
+// 2. Cria uma tabela (slice) com vários cenários
+// 3. Itera sobre os cenários executando o teste
+func TestCalculateTaxBatch(t *testing.T) {
+
+	// Struct que representa um cenário de teste
+	// 🔍 Nome curto é comum em escopos locais
+	type calcTax struct {
+		amount, expected float64
+	}
+
+	// Tabela de testes
+	// 💡 Cada linha representa um caso de teste
+	table := []calcTax{
+		{500.0, 5.0},    // caso abaixo do limite
+		{1000.0, 10.0},  // caso exatamente no limite (boundary test)
+		{1500.0, 10.0},  // acima do limite
+	}
+
+	// Loop sobre os cenários
+	// ⚠️ Aqui temos uma melhoria importante possível (subtests)
+	for _, item := range table {
+
+		// Execução
+		result := CalculateTax(item.amount)
+
+		// Validação
+		if result != item.expected {
+			t.Errorf("Expected %f but got %f", item.expected, result)
+		}
+	}
+}
+
+/*
+================================================================================
+🔍 MELHORIAS IMPORTANTES (NÍVEL SÊNIOR)
+================================================================================
+
+1. USO DE SUBTESTS (t.Run)
+Permite identificar exatamente qual caso falhou.
+
+Exemplo:
+
+for _, item := range table {
+	item := item // ⚠️ evita bug de closure (escape de variável)
+
+	t.Run(fmt.Sprintf("amount=%.2f", item.amount), func(t *testing.T) {
+		result := CalculateTax(item.amount)
+		if result != item.expected {
+			t.Errorf("Expected %f but got %f", item.expected, result)
+		}
+	})
+}
+
+💡 Isso melhora MUITO debug em pipelines CI/CD.
+
+--------------------------------------------------------------------------------
+
+2. PARALELISMO EM TESTES
+
+t.Parallel() pode ser usado dentro de subtests:
+
+t.Run(..., func(t *testing.T) {
+	t.Parallel()
+	...
+})
+
+🧠 Internamente:
+- Go cria goroutines para rodar testes em paralelo
+- Scheduler gerencia execução
+- Excelente para testes independentes
+
+⚠️ Cuidado:
+- Não usar quando há estado compartilhado (race condition)
+
+--------------------------------------------------------------------------------
+
+3. COMPARAÇÃO DE FLOAT
+
+⚠️ Comparar float com == é perigoso em produção.
+
+Melhor abordagem:
+
+const epsilon = 0.0001
+if math.Abs(result-item.expected) > epsilon {
+	t.Errorf(...)
+}
+
+🧠 Isso evita problemas de precisão binária do float64.
+
+--------------------------------------------------------------------------------
+
+4. COBERTURA DE TESTES
+
+Comando:
+
+go test -cover
+
+💡 Ajuda a identificar partes não testadas do código.
+
+--------------------------------------------------------------------------------
+
+5. BENCHMARK (IMPORTANTE PARA PERFORMANCE)
+
+func BenchmarkCalculateTax(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		CalculateTax(1500.0)
+	}
+}
+
+🧠 Isso mede:
+- tempo de execução
+- alocações
+- performance geral
+
+================================================================================
+📦 EXEMPLOS ADICIONAIS
+================================================================================
+
+// Testando edge case (valor negativo)
+func TestCalculateTaxNegative(t *testing.T) {
+	result := CalculateTax(-100)
+	expected := 5.0 // regra atual não trata negativos
+
+	if result != expected {
+		t.Errorf("Expected %f but got %f", expected, result)
+	}
+}
+
+// Teste com subtests (forma recomendada)
+func TestCalculateTaxWithSubtests(t *testing.T) {
+	tests := []struct {
+		name     string
+		amount   float64
+		expected float64
+	}{
+		{"below threshold", 500, 5},
+		{"at threshold", 1000, 10},
+		{"above threshold", 2000, 10},
+	}
+
+	for _, tt := range tests {
+		tt := tt // evita bug de closure
+
+		t.Run(tt.name, func(t *testing.T) {
+			result := CalculateTax(tt.amount)
+			if result != tt.expected {
+				t.Errorf("Expected %f but got %f", tt.expected, result)
+			}
+		})
+	}
+}
+
+================================================================================
+✅ BOAS PRÁTICAS
+================================================================================
+
+- Preferir table-driven tests
+- Usar subtests (t.Run)
+- Nomear casos de teste claramente
+- Evitar duplicação
+- Testar boundary conditions (ex: 999, 1000, 1001)
+- Testar edge cases (ex: negativos, zero)
+- Separar testes por responsabilidade
+
+================================================================================
+⚠️ ARMADILHAS COMUNS
+================================================================================
+
+- Comparar float com ==
+- Não testar boundary values
+- Não usar subtests (dificulta debug)
+- Repetição de código em testes
+- Esquecer de isolar estado (testes não determinísticos)
+- Ignorar erros de digitação em mensagens (debug confuso)
+
+================================================================================
+💼 DICA DE ENTREVISTA
+================================================================================
+
+Pergunta clássica:
+"Como você estrutura testes em Go?"
+
+Resposta esperada:
+- Uso de table-driven tests
+- Uso de subtests (t.Run)
+- Testes pequenos e determinísticos
+- Cobertura de edge cases
+- Eventual uso de benchmarks
+
+================================================================================
+🚀 COMANDOS IMPORTANTES
+================================================================================
+
+go test .          // roda testes do pacote
+go test -v         // verbose (mostra detalhes)
+go test -cover     // cobertura de testes
+go test -bench=.   // benchmark
+
+⚠️ Correção:
+- "go mod test ." está incorreto
+- O correto é: go test .
+
+================================================================================
+*/
