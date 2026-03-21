@@ -1,3 +1,4 @@
+
 // =========================
 // arquivo: tax.go
 // =========================
@@ -287,6 +288,10 @@ go test .          // roda testes do pacote
 go test -v         // verbose (mostra detalhes)
 go test -cover     // cobertura de testes
 go test -bench=.   // benchmark
+
+Esses comando geram o arquivo do coverage, e exibem numa pagina web:
+go test -coverprofile="coverage.out" .
+go tool cover -html coverage.out
 
 ⚠️ Correção:
 - "go mod test ." está incorreto
