@@ -1,0 +1,271 @@
+
+// =====================================================================================
+// 📦 ARQUIVO DE REFERÊNCIA: BENCHMARK EM GO (GUIA PRÁTICO E DIDÁTICO)
+// =====================================================================================
+//
+// Este arquivo contém:
+// - Explicação prática de benchmarks em Go
+// - Comandos essenciais para uso no dia a dia
+// - Interpretação de resultados
+// - Correção de problemas comuns (como o seu caso)
+// - Boas práticas de engenharia (nível sênior)
+//
+// =====================================================================================
+// 🧠 COMO FUNCIONA O BENCHMARK EM GO
+// =====================================================================================
+//
+// Benchmarks em Go utilizam o tipo *testing.B.
+//
+// O campo mais importante:
+//   b.N
+//
+// 🔍 O que é b.N?
+// - É definido automaticamente pelo runtime do Go
+// - O Go executa o benchmark várias vezes até atingir precisão estatística
+// - Ele aumenta dinamicamente o número de execuções
+//
+// 💡 Exemplo:
+// Se sua função for muito rápida:
+//   b.N pode ser 1.000.000.000 (1 bilhão)
+//
+// Se for lenta:
+//   b.N pode ser 10 ou 100
+//
+// ⚙️ Internamente:
+// - O Go tenta manter o tempo total do benchmark estável (~1 segundo por padrão)
+//
+// =====================================================================================
+// 🚀 COMANDOS PRINCIPAIS (USO REAL NO DIA A DIA)
+// =====================================================================================
+//
+// ▶️ Rodar benchmarks
+// go test -bench=.
+//
+// 🔍 Executa todas as funções Benchmark*
+// Exemplo:
+// BenchmarkCalculateTax-8    1000000000    0.25 ns/op
+//
+// -------------------------------------------------------------------------------------
+//
+// ▶️ Rodar benchmark SEM testes
+// go test -bench=. -run=^$
+//
+// 🔥 IMPORTANTE:
+// - "-run=^$" garante que NENHUM teste será executado
+// - "^$" é regex para "string vazia"
+//
+// ⚠️ Seu exemplo estava quase certo:
+// -run=^# funciona, mas não é padrão
+// -run=^$ é a forma correta e mais usada
+//
+// -------------------------------------------------------------------------------------
+//
+// ▶️ Rodar múltiplas vezes
+// go test -bench=. -run=^$ -count=10
+//
+// 💡 Útil para:
+// - verificar variação
+// - evitar outliers
+//
+// -------------------------------------------------------------------------------------
+//
+// ▶️ Controlar tempo do benchmark
+// go test -bench=. -run=^$ -benchtime=3s
+//
+// 💡 Faz cada benchmark rodar por mais tempo → maior precisão
+//
+// -------------------------------------------------------------------------------------
+//
+// ▶️ VER USO DE MEMÓRIA (ESSENCIAL)
+// go test -bench=. -benchmem -run=^$
+//
+// 🔥 Isso resolve o seu problema de "não ver uso de recurso"
+//
+// Saída esperada:
+// BenchmarkCalculateTax-8    1000000000    0.25 ns/op    0 B/op    0 allocs/op
+//
+// Onde:
+// - ns/op → tempo por operação
+// - B/op → bytes alocados por operação
+// - allocs/op → número de alocações
+//
+// -------------------------------------------------------------------------------------
+//
+// ▶️ Rodar apenas benchmarks específicos
+// go test -bench=CalculateTax -run=^$
+//
+// 💡 Usa regex
+//
+// -------------------------------------------------------------------------------------
+//
+// ▶️ Rodar com CPU específica
+// go test -bench=. -cpu=1,2,4 -run=^$
+//
+// 🔍 Testa comportamento com múltiplos núcleos
+//
+// =====================================================================================
+// 📊 INTERPRETAÇÃO DOS RESULTADOS
+// =====================================================================================
+//
+// Exemplo real:
+//
+// BenchmarkCalculateTax-8      1000000000    0.25 ns/op
+//
+// 🔍 Quebrando:
+// - BenchmarkCalculateTax → nome
+// - -8 → número de CPUs (GOMAXPROCS)
+// - 1000000000 → b.N (quantidade de execuções)
+// - 0.25 ns/op → tempo médio por execução
+//
+// -------------------------------------------------------------------------------------
+//
+// COM -benchmem:
+//
+// BenchmarkCalculateTax-8      1000000000    0.25 ns/op    0 B/op    0 allocs/op
+//
+// 🔍 Interpretação:
+// - 0 B/op → nenhuma alocação
+// - 0 allocs/op → extremamente eficiente (stack only)
+//
+// =====================================================================================
+// ⚠️ POR QUE VOCÊ NÃO ESTÁ VENDO RESULTADOS COMPLETOS?
+// =====================================================================================
+//
+// Possíveis causas:
+//
+// 1. ❌ Não está usando -benchmem
+// ✔️ Solução:
+// go test -bench=. -benchmem -run=^$
+//
+// -------------------------------------------------------------------------------------
+//
+// 2. ❌ Benchmark muito rápido
+// Algumas máquinas exibem saída simplificada
+//
+// ✔️ Solução:
+// go test -bench=. -benchtime=3s -benchmem -run=^$
+//
+// -------------------------------------------------------------------------------------
+//
+// 3. ❌ Diferença entre benchmarks não evidente
+//
+// No seu caso:
+//
+// BenchmarkCalculateTax → muito rápido
+// BenchmarkCalculateTax2 → tem time.Sleep(1ms)
+//
+// ✔️ Isso DEVE gerar diferença enorme:
+//
+// ns/op do segundo será MUITO maior
+//
+// -------------------------------------------------------------------------------------
+//
+// 4. ❌ Você espera comparação automática
+//
+// Go NÃO compara benchmarks automaticamente
+//
+// ✔️ Para comparar:
+// Execute ambos e compare manualmente
+//
+// OU use ferramenta externa:
+//
+// go install golang.org/x/perf/cmd/benchstat@latest
+//
+// Exemplo:
+//
+// go test -bench=. -run=^$ > old.txt
+// go test -bench=. -run=^$ > new.txt
+// benchstat old.txt new.txt
+//
+// =====================================================================================
+// 🧪 SEU CÓDIGO EXPLICADO (FOCO EM BENCHMARK)
+// =====================================================================================
+
+// Benchmark padrão
+func BenchmarkCalculateTax(b *testing.B) {
+	// 🔁 Loop controlado pelo Go
+	for i := 0; i < b.N; i++ {
+		CalculateTax(500.0)
+	}
+	// ⚠️ Nenhuma alocação → super performático
+}
+
+// Benchmark com delay artificial
+func BenchmarkCalculateTax2(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		CalculateTax2(500.0)
+	}
+	// ⚠️ time.Sleep(1ms) impacta diretamente:
+	// - aumenta ns/op drasticamente
+	// - reduz b.N (menos execuções)
+}
+
+// =====================================================================================
+// 📦 EXEMPLOS AVANÇADOS
+// =====================================================================================
+
+// Benchmark evitando otimização do compilador
+var result float64
+
+func BenchmarkCalculateTaxSafe(b *testing.B) {
+	var r float64
+	for i := 0; i < b.N; i++ {
+		r = CalculateTax(500.0)
+	}
+	result = r // evita otimização (dead code elimination)
+}
+
+// Benchmark com reset de timer
+func BenchmarkWithSetup(b *testing.B) {
+	// Setup (não queremos medir isso)
+	time.Sleep(time.Millisecond)
+
+	b.ResetTimer() // 🔥 começa a medir daqui
+
+	for i := 0; i < b.N; i++ {
+		CalculateTax(500.0)
+	}
+}
+
+// =====================================================================================
+// ✅ BOAS PRÁTICAS
+// =====================================================================================
+//
+// - Sempre usar -benchmem
+// - Evitar código morto (usar variável global para armazenar resultado)
+// - Isolar setup com b.ResetTimer()
+// - Usar -benchtime maior para mais precisão
+// - Rodar múltiplas vezes (-count)
+// - Comparar com benchstat
+//
+// =====================================================================================
+// ⚠️ ARMADILHAS COMUNS
+// =====================================================================================
+//
+// - Achar que Go compara benchmarks automaticamente ❌
+// - Não usar -benchmem ❌
+// - Benchmark com código otimizado fora ❌
+// - Medir setup sem querer ❌
+// - Não considerar variação de CPU ❌
+//
+// =====================================================================================
+// 💼 DICA DE ENTREVISTA
+// =====================================================================================
+//
+// Pergunta comum:
+// "Como você mede performance em Go?"
+//
+// Resposta forte:
+// - Uso testing.B para benchmarks
+// - Uso -benchmem para analisar alocação
+// - Uso benchstat para comparação
+// - Evito otimizações indevidas do compilador
+// - Controlo tempo com -benchtime
+//
+// =====================================================================================
+// 🚀 COMANDO FINAL RECOMENDADO (PADRÃO PROFISSIONAL)
+// =====================================================================================
+//
+// go test -bench=. -benchmem -run=^$ -count=5 -benchtime=3s
+//
+// =====================================================================================
