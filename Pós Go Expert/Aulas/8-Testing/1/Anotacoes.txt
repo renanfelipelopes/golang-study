@@ -293,6 +293,17 @@ Esses comando geram o arquivo do coverage, e exibem numa pagina web:
 go test -coverprofile="coverage.out" .
 go tool cover -html coverage.out
 
+Comando para rodar Benchmark e verificar perfomance:
+go test -bench=.
+
+Para rodar o Benchmark sem rodar o teste junto (na frente do igual do comando '-run=', podemos passar o nome do que queremos executar, se passarmos um valor aleatorio, não será identificado o teste e não será executado junto):
+go test -bench=. -run=^#
+
+Para rodar o benchmark exibindo a execução 10 vezes:
+go test -bench=. -run=^# -count=10
+
+go test -bench=. -run=^# -count=10 -benchtime=3s
+
 ⚠️ Correção:
 - "go mod test ." está incorreto
 - O correto é: go test .
