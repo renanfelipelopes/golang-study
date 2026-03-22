@@ -1,0 +1,244 @@
+// =====================================================================================
+// 📦 FUZZING EM GO (GUIA PRÁTICO E DIDÁTICO)
+// =====================================================================================
+//
+// Fuzzing é uma técnica de teste automatizado onde o sistema gera inputs aleatórios
+// (ou semi-aleatórios) para tentar encontrar falhas, bugs ou comportamentos inesperados.
+//
+// 💡 Diferente de testes tradicionais:
+// - Testes comuns → você define entradas específicas
+// - Fuzzing → o Go gera milhares/milhões de entradas automaticamente
+//
+// 🎯 Objetivo:
+// - Encontrar edge cases que você não pensou
+// - Detectar bugs, panics e inconsistências
+// - Aumentar robustez do código
+//
+// 🔥 Muito usado em:
+// - parsers
+// - APIs
+// - validações
+// - sistemas críticos
+//
+// =====================================================================================
+// 🧠 DIFERENÇA ENTRE testing.T, testing.B e testing.F
+// =====================================================================================
+//
+// testing.T → testes tradicionais
+// testing.B → benchmarks (performance)
+// testing.F → fuzzing (geração automática de inputs)
+//
+// 💡 Por isso usamos:
+//
+// func FuzzCalculateTax(f *testing.F)
+//
+// =====================================================================================
+// 🔍 CÓDIGO EXPLICADO (FUZZING)
+// =====================================================================================
+
+func FuzzCalculateTax(f *testing.F) {
+
+	// =================================================================================
+	// 🌱 SEED (DADOS INICIAIS)
+	// =================================================================================
+	//
+	// Seeds são inputs iniciais que ajudam o motor de fuzzing a começar.
+	//
+	// 💡 Por que isso é importante?
+	// - O fuzzing NÃO começa do zero
+	// - Ele usa esses valores como base
+	// - A partir deles, gera variações (mutations)
+	//
+	// 🧠 Internamente:
+	// - Go aplica mutações nos seeds (ex: +1, -1, valores extremos, etc)
+	// - Isso acelera encontrar bugs relevantes
+	//
+	// 💡 Boa prática:
+	// - Sempre incluir:
+	//   - valores negativos
+	//   - zero
+	//   - limites (boundary)
+	//   - valores grandes
+	//
+	seed := []float64{-1, -2, -2.5, 500.0, 1000.0, 1501.0}
+
+	for _, amount := range seed {
+		f.Add(amount) // adiciona cada seed ao fuzzing
+	}
+
+	// =================================================================================
+	// 🔁 FUNÇÃO DE FUZZ
+	// =================================================================================
+	//
+	// Essa função será executada milhares/milhões de vezes com inputs variados.
+	//
+	// 💡 Importante:
+	// - Aqui usamos testing.T (não F)
+	// - Cada execução é um "teste isolado"
+	//
+	f.Fuzz(func(t *testing.T, amount float64) {
+
+		result := CalculateTax(amount)
+
+		// =================================================================================
+		// 📌 REGRAS DE VALIDAÇÃO (INVARIANTS)
+		// =================================================================================
+		//
+		// Fuzzing NÃO testa valores específicos,
+		// ele testa PROPRIEDADES do sistema.
+		//
+		// Exemplo:
+		// "Se amount <= 0, então resultado deve ser 0"
+		//
+		// Isso é chamado de:
+		// 👉 Property-Based Testing
+		//
+
+		if amount <= 0 && result != 0 {
+			t.Errorf("Reveived %f but expected 0", result)
+		}
+
+		if amount > 20000 && result != 20 {
+			t.Errorf("Reveived %f but expected 20", result)
+		}
+	})
+}
+
+// =====================================================================================
+// 🚀 COMO EXECUTAR FUZZING
+// =====================================================================================
+//
+// ▶️ Rodar fuzzing:
+// go test -fuzz=. -run=^$
+//
+// 🔥 IMPORTANTE:
+// -run=^$ evita rodar testes normais
+//
+// -------------------------------------------------------------------------------------
+//
+// ▶️ Rodar por tempo específico:
+// go test -fuzz=. -fuzztime=5s -run=^$
+//
+// 💡 Ideal para CI/CD
+//
+// =====================================================================================
+// 📊 ENTENDENDO A SAÍDA
+// =====================================================================================
+//
+// fuzz: elapsed: 0s, gathering baseline coverage
+// → Go executa seeds iniciais
+//
+// fuzz: now fuzzing with 8 workers
+// → paralelismo (goroutines)
+//
+// execs: 331 (2095/sec)
+// → quantidade de execuções por segundo
+//
+// new interesting: 1
+// → encontrou input novo relevante
+//
+// -------------------------------------------------------------------------------------
+//
+// ❌ Quando encontra erro:
+//
+// --- FAIL: FuzzCalculateTax
+// tax_test.go:58: Received 5.000000 but expected 0
+//
+// ✔️ Go salva automaticamente o input que causou falha:
+//
+// testdata/fuzz/FuzzCalculateTax/xxxxx
+//
+// -------------------------------------------------------------------------------------
+//
+// ▶️ Reexecutar caso específico:
+//
+// go test -run=FuzzCalculateTax/xxxxx
+//
+// 💡 Isso transforma o bug em teste reproduzível
+//
+// =====================================================================================
+// 🧠 PONTO CRÍTICO (SEU CÓDIGO)
+// =====================================================================================
+//
+// Sua função:
+//
+// if amount <= 0 {
+//     return 0
+// }
+//
+// ✔️ Correto
+//
+// MAS antes isso NÃO existia → fuzzing encontrou bug automaticamente
+//
+// 🔥 Esse é o poder do fuzzing:
+// - encontrar cenários que você não testou manualmente
+//
+// =====================================================================================
+// 📦 EXEMPLOS ADICIONAIS
+// =====================================================================================
+
+// Exemplo com múltiplos parâmetros
+func FuzzCalculateTaxAdvanced(f *testing.F) {
+
+	f.Add(1000.0, true)
+
+	f.Fuzz(func(t *testing.T, amount float64, shouldBeHigh bool) {
+		result := CalculateTax(amount)
+
+		if shouldBeHigh && amount < 1000 {
+			t.Errorf("invalid expectation")
+		}
+
+		if amount >= 1000 && result < 10 {
+			t.Errorf("unexpected low tax")
+		}
+	})
+}
+
+// =====================================================================================
+// ✅ BOAS PRÁTICAS
+// =====================================================================================
+//
+// - Sempre definir seeds relevantes
+// - Testar propriedades (não valores fixos)
+// - Cobrir edge cases (negativo, zero, extremos)
+// - Usar fuzztime em CI
+// - Reexecutar casos salvos
+//
+// =====================================================================================
+// ⚠️ ARMADILHAS COMUNS
+// =====================================================================================
+//
+// - Não usar seeds → fuzzing menos eficiente
+// - Testar valores fixos (errado para fuzzing)
+// - Ignorar casos gerados automaticamente
+// - Não versionar testdata/fuzz (IMPORTANTE)
+// - Escrever validações fracas (pouco valor)
+//
+// =====================================================================================
+// 💼 DICA DE ENTREVISTA
+// =====================================================================================
+//
+// Pergunta:
+// "O que é fuzzing?"
+//
+// Resposta forte:
+// - Técnica de teste automatizado com inputs aleatórios
+// - Foco em propriedades do sistema
+// - Detecta edge cases e bugs inesperados
+// - Go suporta nativamente via testing.F
+//
+// =====================================================================================
+// 🚀 RESUMO PRÁTICO (DIA A DIA)
+// =====================================================================================
+//
+// - Use fuzzing para validar regras gerais
+// - Combine com testes tradicionais
+// - Sempre use seeds
+// - Reproduza bugs automaticamente
+//
+// Comando padrão:
+//
+// go test -fuzz=. -fuzztime=5s -run=^$
+//
+// =====================================================================================
