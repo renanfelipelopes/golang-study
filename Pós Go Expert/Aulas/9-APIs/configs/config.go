@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
 )
 
@@ -16,6 +17,7 @@ type conf struct {
 	WebServerPort string
 	JWTSecret     string
 	JwtExperesIn  int
+	TokenAuth     *jwtauth.JWTAuth
 }
 
 func LoadConfig(path string) (*conf, error) {
