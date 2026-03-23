@@ -11,4 +11,9 @@ func TestCalculateTax(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 10.0, tax)
 
+	tax, err = CalculateTax(0)
+	assert.Error(t, err, "Amount must be greater than 0")
+	assert.Equal(t, 0.0, tax)
+	assert.Contains(t, err.Error(), "greater than 0")
+
 }
