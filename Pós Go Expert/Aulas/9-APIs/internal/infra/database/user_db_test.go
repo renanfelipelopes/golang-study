@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/devfullcycle/goexpert/9-APIs/internal/entity"
+	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
