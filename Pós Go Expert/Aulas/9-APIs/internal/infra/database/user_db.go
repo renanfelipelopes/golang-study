@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Product struct {
+type User struct {
 	DB *gorm.DB
 }
 
