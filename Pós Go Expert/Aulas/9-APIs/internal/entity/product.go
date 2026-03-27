@@ -1,21 +1,22 @@
 package entity
 
 import (
+	"errors"
 	"time"
 
 	"github.com/devfullcycle/goexpert/9-APIs/pkg/entity"
 )
 
 var (
-	ErrIDIsRequired    = erros.New("id is required")
-	ErrInvalidID       = erros.New("invalid id")
-	ErrNameIsRequired  = erros.New("name is required")
-	ErrPriceIsRequired = erros.New("price is required")
-	ErrInvalidPrice    = erros.New("invalid price")
+	ErrIDIsRequired    = errors.New("id is required")
+	ErrInvalidID       = errors.New("invalid id")
+	ErrNameIsRequired  = errors.New("name is required")
+	ErrPriceIsRequired = errors.New("price is required")
+	ErrInvalidPrice    = errors.New("invalid price")
 )
 
 type Product struct {
-	ID        entidy.ID `json:"id"`
+	ID        entity.ID `json:"id"`
 	Name      string    `json:"name"`
 	Price     int       `json:"price"`
 	CreatedAt time.Time `json:"created_at"`
