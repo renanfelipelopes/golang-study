@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/devfullcycle/goexpert/9-APIs/configs"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 
+	"github.com/devfullcycle/goexpert/9-APIs/internal/dto"
 	"github.com/devfullcycle/goexpert/9-APIs/internal/entity"
 	"github.com/devfullcycle/goexpert/9-APIs/internal/infra/database"
 )
@@ -36,5 +38,11 @@ func NewProductHandler(db database.ProductInterface) *ProductHandler {
 }
 
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, *http.Request) {
+	var product dto.CreateProductInput
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	
 }
