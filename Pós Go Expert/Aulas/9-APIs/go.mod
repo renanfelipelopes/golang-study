@@ -10,7 +10,11 @@ require (
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	gorm.io/gorm v1.31.1
-	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+)
+
+require (
+	github.com/go-chi/chi v1.5.1
+	github.com/go-chi/chi/v5 v5.2.5
 )
 
 require (
@@ -28,7 +32,6 @@ require (
 	github.com/lestrrat-go/jwx v1.1.0 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
-	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

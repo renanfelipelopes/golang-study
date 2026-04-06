@@ -7,6 +7,7 @@ import (
 	"github.com/devfullcycle/goexpert/9-APIs/internal/dto"
 	"github.com/devfullcycle/goexpert/9-APIs/internal/entity"
 	"github.com/devfullcycle/goexpert/9-APIs/internal/infra/database"
+	entityPkg "github.com/devfullcycle/goexpert/9-APIs/pkg/entity"
 	"github.com/go-chi/chi"
 )
 
@@ -53,5 +54,39 @@ func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Enconde(product)
+	json.NewEncoder(w).Encode(product)
+}
+
+func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var product entity.Product
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	product.ID, err = entityPkg.ParseID(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	_, err = h.ProductDB.FindByID(id)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	err = h.ProductDB.Update(&product)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
